@@ -33,15 +33,26 @@ async function run() {
     app.post("/allJobs", async (req, res) => {
       const newJobs = req.body;
       const result = await jobsCollection.insertOne(newJobs);
-      res.send(result)
+      res.send(result);
     });
 
-    app.delete('/allJobs/:id',async(req,res)=>{
-        const id = req.params.id
-        const query = { _id: new ObjectId(id)}
-        const result= await jobsCollection.deleteOne(query)
-        res.send(result)
-    })
+    app.patch("/allJobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedJobs = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: updatedJobs,
+      };
+      const result = await jobsCollection.updateOne(query, update);
+      res.send(result);
+    });
+
+    app.delete("/allJobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobsCollection.deleteOne(query);
+      res.send(result);
+    });
 
     await client.db("admin").command({ ping: 1 });
 
