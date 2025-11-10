@@ -30,13 +30,26 @@ async function run() {
     const db = client.db("freelancy_db");
     const jobsCollection = db.collection("jobs");
 
-    app.post("/allJobs", async (req, res) => {
+    app.get("/allJobs", async (req, res) => {
+      const cursor = jobsCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/allJobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobsCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.post("/addJob", async (req, res) => {
       const newJobs = req.body;
       const result = await jobsCollection.insertOne(newJobs);
       res.send(result);
     });
 
-    app.patch("/allJobs/:id", async (req, res) => {
+    app.patch("/updateJob/:id", async (req, res) => {
       const id = req.params.id;
       const updatedJobs = req.body;
       const query = { _id: new ObjectId(id) };
@@ -47,7 +60,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/allJobs/:id", async (req, res) => {
+    app.delete("/deleteJob/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await jobsCollection.deleteOne(query);
