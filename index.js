@@ -77,7 +77,7 @@ async function run() {
     });
 
     app.post("/jobs", verifyFireBaseToken, async (req, res) => {
-      console.log('headers in the post', req.headers)
+      // console.log('headers in the post', req.headers)
       const newJobs = {...req.body, postedAt: new Date()};
       const result = await jobsCollection.insertOne(newJobs);
       res.send(result);
