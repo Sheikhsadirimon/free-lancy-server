@@ -4,9 +4,35 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
 
+const admin = require("firebase-admin");
+
+const serviceAccount = require("./free-lancy-firebase-admin-key.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+
 // middleware
 app.use(cors());
 app.use(express.json());
+
+const verifyFireBaseToken = async (req,res,next)=>{
+    const authorization = req.headers.authorization
+    if(!authorization){
+      return res.status(401).send({message: 'unauthorized access'})
+    }
+    const token = authorization.split(' ')[1];
+      try{
+          const decoded = await admin.auth().verifyIdToken(token)
+          req.token_email = decoded.email
+          next()
+      }
+      catch(error){
+        return res.status(401).send({message: 'unauthorized access'})
+      }
+
+}
 
 const uri =
   "mongodb+srv://freelancydbUser:cB7afRJME2Y2yCIn@clusterpro.d9ffs3x.mongodb.net/?appName=ClusterPro";
@@ -50,7 +76,8 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/jobs", async (req, res) => {
+    app.post("/jobs", verifyFireBaseToken, async (req, res) => {
+      console.log('headers in the post', req.headers)
       const newJobs = {...req.body, postedAt: new Date()};
       const result = await jobsCollection.insertOne(newJobs);
       res.send(result);
