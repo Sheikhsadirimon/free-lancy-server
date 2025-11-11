@@ -30,26 +30,33 @@ async function run() {
     const db = client.db("freelancy_db");
     const jobsCollection = db.collection("jobs");
 
-    app.get("/allJobs", async (req, res) => {
-      const cursor = jobsCollection.find();
+    app.get("/jobs", async (req, res) => {
+        console.log(req.query)
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.email = email;
+      }
+
+      const cursor = jobsCollection.find(query).sort({ _id: -1 });
       const result = await cursor.toArray();
       res.send(result);
     });
 
-    app.get("/allJobs/:id", async (req, res) => {
+    app.get("/jobs/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await jobsCollection.findOne(query);
       res.send(result);
     });
 
-    app.post("/addJob", async (req, res) => {
-      const newJobs = req.body;
+    app.post("/jobs", async (req, res) => {
+      const newJobs = {...req.body, postedAt: new Date()};
       const result = await jobsCollection.insertOne(newJobs);
       res.send(result);
     });
 
-    app.patch("/updateJob/:id", async (req, res) => {
+    app.patch("/jobs/:id", async (req, res) => {
       const id = req.params.id;
       const updatedJobs = req.body;
       const query = { _id: new ObjectId(id) };
@@ -60,7 +67,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/deleteJob/:id", async (req, res) => {
+    app.delete("/jobs/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await jobsCollection.deleteOne(query);
