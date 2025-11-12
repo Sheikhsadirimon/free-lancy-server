@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -35,7 +36,7 @@ const verifyFireBaseToken = async (req,res,next)=>{
 }
 
 const uri =
-  "mongodb+srv://freelancydbUser:cB7afRJME2Y2yCIn@clusterpro.d9ffs3x.mongodb.net/?appName=ClusterPro";
+  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@clusterpro.d9ffs3x.mongodb.net/?appName=ClusterPro`;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -56,7 +57,7 @@ async function run() {
     const db = client.db("freelancy_db");
     const jobsCollection = db.collection("jobs");
 
-    app.get("/jobs", async (req, res) => {
+    app.get("/Jobs", async (req, res) => {
         console.log(req.query)
       const email = req.query.email;
       const query = {};
@@ -69,21 +70,21 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/jobs/:id", async (req, res) => {
+    app.get("/Jobs/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await jobsCollection.findOne(query);
       res.send(result);
     });
 
-    app.post("/jobs", verifyFireBaseToken, async (req, res) => {
+    app.post("/Jobs", verifyFireBaseToken, async (req, res) => {
       // console.log('headers in the post', req.headers)
       const newJobs = {...req.body, postedAt: new Date()};
       const result = await jobsCollection.insertOne(newJobs);
       res.send(result);
     });
 
-    app.patch("/jobs/:id", async (req, res) => {
+    app.patch("/Jobs/:id", async (req, res) => {
       const id = req.params.id;
       const updatedJobs = req.body;
       const query = { _id: new ObjectId(id) };
@@ -94,7 +95,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/jobs/:id", async (req, res) => {
+    app.delete("/Jobs/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await jobsCollection.deleteOne(query);
